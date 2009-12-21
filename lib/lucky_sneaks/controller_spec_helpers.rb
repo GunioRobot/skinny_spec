@@ -9,73 +9,92 @@ module LuckySneaks
     include LuckySneaks::NestedResourceHelpers
     
     def self.included(base)
+      base.send :include, InstanceMethods
       base.extend ExampleGroupMethods
       base.extend ControllerRequestHelpers::ExampleGroupMethods
       base.extend NestedResourceHelpers::ExampleGroupMethods
     end
     
-    # Same as with_restful_actions(:all)
-    def with_default_restful_actions(params = {}, &block)
-      with_restful_actions(:all, params, &block)
-    end
-    
-    # Evaluates the specified block for each of the RESTful controller methods given. If
-    # no actions are explicitly specified, or if the only action is :all, runs all the
-    # default RESTful methods. You can also pass additional parameters as an options hash.
-    #
-    #   with_restful_actions { ... }
-    #     #=> index, show, new, create, edit, update, destroy
-    #
-    #   with_restful_actions(:all) { ... }
-    #     #=> same
-    #
-    #   with_restful_actions(:show, :edit, :update) { ... }
-    #     #=> just show, edit, update
-    #
-    #   with_restful_actions(:param1 => value, :param2 => quality) { ... }
-    #     #=> all actions with additional parameters
-    #     
-    #   with_restful_actions(:edit, :update, :param => thing) { ... }
-    #     #=> just edit and update with extra params
-    #
-    # This is useful to spec that all controller methods redirect when no user is
-    # logged in.
-    def with_restful_actions(*args, &block)
-      
-      params = args.extract_options!
-      
-      # this only works if the parent is never expected to find a child,
-      # e.g. when the before_filter causes a redirect
-      params.merge!(parentize_params) if parent?
-      
-      actions = {
-        :index   => :get,
-        :show    => :get,
-        :new     => :get,
-        :create  => :post,
-        :edit    => :get,
-        :update  => :put,
-        :destroy => :delete
-      }
-      
-      unless args.empty? || args.include?(:all)
-        # Hash.select returns arrays, not a hash
-        actions.reject! { |action, method| !args.include?(action) }
+    module InstanceMethods
+      # Same as with_restful_actions(:all)
+      def with_default_restful_actions(params = {}, &block)
+        with_restful_actions(:all, params, &block)
       end
+    
+      # Evaluates the specified block for each of the RESTful controller methods given. If
+      # no actions are explicitly specified, or if the only action is :all, runs all the
+      # default RESTful methods.
+      #
+      # This is useful to spec that all controller methods redirect when no user is
+      # logged in.
+      #
+      # Accepted options:
+      #
+      # * <tt>:before</tt> - a block to be called before the request is evaluated
+      # * <tt>:collection</tt> - a hash of additional <tt>action => http_method</tt> routes (similar to <tt>map.resources :resource, :collection => { action => http_method }</tt>)
+      # * <tt>:member</tt> - same as <tt>:collection</tt>, but for individual resource routes
+      #
+      # Examples:
+      #
+      #   with_restful_actions { ... }
+      #     #=> index, show, new, create, edit, update, destroy
+      #
+      #   with_restful_actions(:all) { ... }
+      #     #=> same
+      #
+      #   with_restful_actions(:show, :edit, :update) { ... }
+      #     #=> just show, edit, update
+      #
+      #   with_restful_actions(:index, :collection => { :list => :get }, :member => { :preview => :post }) { ... }
+      #     #=> index and custom list and preview actions
+      #
+      #   with_restful_actions(:param1 => "value", :param2 => "quality") { ... }
+      #     #=> all actions with additional parameters
+      #     
+      #   with_restful_actions(:edit, :update, :param => "thing") { ... }
+      #     #=> just edit and update with extra params
+      def with_restful_actions(*args, &block)
       
-      actions.each do |action, method|
-        if [:show, :edit, :update, :destroy].include?(action)
-          if params[:before]
-            params.delete(:before).call
-          end
-
-          # Presuming any id will do
-          self.send method, action, params.merge(:id => 1)
-        else
-          self.send method, action, params
+        params = args.extract_options!
+      
+        # this only works if the parent is never expected to find a child,
+        # e.g. when the before_filter causes a redirect
+        params.merge!(parentize_params) if parent?
+      
+        actions = {
+          :index   => :get,
+          :show    => :get,
+          :new     => :get,
+          :create  => :post,
+          :edit    => :get,
+          :update  => :put,
+          :destroy => :delete
+        }
+      
+        unless args.empty? || args.include?(:all)
+          # Hash.select returns arrays, not a hash
+          actions.reject! { |action, method| !args.include?(action) }
         end
         
-        block.call
+        # merge custom route definitions
+        member_routes = params.delete(:member) || {}
+        actions.merge!(member_routes)
+        actions.merge!(params.delete(:collection) || {})
+      
+        actions.each do |action, method|
+          if [:show, :edit, :update, :destroy].include?(action) || member_routes.key?(action)
+            if params[:before]
+              params.delete(:before).call
+            end
+            
+            # Presuming any id will do
+            self.send method, action, params.merge(:id => 1)
+          else
+            self.send method, action, params
+          end
+        
+          block.call
+        end
       end
     end
     
@@ -111,6 +130,41 @@ module LuckySneaks
         it "should respond with #{status}" do
           eval_request
           response.status.should == status
+        end
+      end
+      
+      # Creates an expectation that the controller will require some sort of authentication
+      # for a given set of actions (see <tt>with_restful_actions</tt> for accepted arguments).
+      #
+      # The default expectation is a redirect to <tt>login_path</tt>. If that's all your
+      # controller does for unauthenticated users, then no block is necessary.
+      #
+      # Otherwise, the response object is yielded to the block.
+      #
+      # Examples:
+      #
+      #   it_should_require_user(:new, :create, :edit, :update, :destroy)
+      #   it_should_require_user(:destroy) { |response| response.status.to_i.should == 404 }
+      def it_should_require_user(*args, &block)
+        options = args.extract_options!
+        actions = args.join(', ')
+
+        if options.key?(:collection)
+          actions << ', ' + options[:collection].keys.join(', ')
+        end
+
+        if options.key?(:member)
+          actions << ', ' + options[:member].keys.join(', ')
+        end
+
+        it "should require a user for actions #{actions}" do
+          with_restful_actions(*args.push(options)) do
+            if block_given?
+              yield response
+            else
+              response.should redirect_to(login_path)
+            end
+          end
         end
       end
 
