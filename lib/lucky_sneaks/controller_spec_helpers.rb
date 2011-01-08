@@ -175,9 +175,9 @@ module LuckySneaks
       #   it_should_find :foos, :all                                # An explicit version of the above
       #   it_should_find :foos, :conditions => {:foo => "bar"}      # => Foo.should_receive(:find).with(:all, :conditions => {"foo" => "bar"}
       #   it_should_find :foos, "joe", :method => :find_all_by_name # Foo.should_receive(:find_all_by_name).with("joe")
-      #   it_should_find :foo                                       # => Foo.should_recieve(:find).with(@foo.id.to_s)
-      #   it_should_find :foo, :params => "id"                      # => Foo.should_receive(:find).with(params[:id].to_s)
-      #   it_should_find :foo, 2                                    # => Foo.should_receive(:find).with("2")
+      #   it_should_find :foo                                       # => Foo.should_recieve(:find).with(@foo.id)
+      #   it_should_find :foo, :params => "id"                      # => Foo.should_receive(:find).with(params[:id])
+      #   it_should_find :foo, 2                                    # => Foo.should_receive(:find).with(2)
       #   it_should_find :foo, "joe", :method => :find_by_name      # => Foo.should_recieve(:find_by_name).with("joe")
       # 
       # <b>Note:</b> All params (key and value) will be strings if they come from a form element and are handled
@@ -185,7 +185,8 @@ module LuckySneaks
       def it_should_find(name, *args)
         name_string = name.to_s
         name_message = if name_string == name_string.singularize
-          "a #{name}"
+          article = name_string =~ /^[aeiou]/ ? 'an' : 'a'
+          "#{article} #{name}"
         else
           name
         end
@@ -193,12 +194,12 @@ module LuckySneaks
           options = args.extract_options!
           # Blech!
           argument = if param = params[options.delete(:params)]
-            param.to_s
+            param
           else
             if args.first
               args.first
             elsif (instance = instance_variable_get("@#{name}")).is_a?(ActiveRecord::Base)
-              instance.id.to_s
+              instance.id
             else
               :all
             end

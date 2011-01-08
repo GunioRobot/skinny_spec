@@ -10,7 +10,7 @@ module LuckySneaks
   module ViewSpecHelpers
     include LuckySneaks::CommonSpecHelpers
     include LuckySneaks::ViewStubHelpers
-    include ActionController::PolymorphicRoutes
+    include ActionDispatch::Routing::PolymorphicRoutes
     
     def self.included(base) # :nodoc:
       base.extend ExampleGroupLevelMethods

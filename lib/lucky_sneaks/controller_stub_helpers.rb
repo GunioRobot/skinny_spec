@@ -21,7 +21,7 @@ module LuckySneaks # :nodoc:
     # Any additional options will be passed as arguments to the class find.
     # You will want to make sure to pass those arguments to the <tt>it_should_find</tt> spec as well.
     def stub_find_all(klass, options = {})
-      returning(Array.new(options[:size] || 3){mock_model(klass)}) do |collection|
+      (Array.new(options[:size] || 3){mock_model(klass)}).tap do |collection|
         stub_out klass, options.delete(:stub)
 
         if format = options.delete(:format)
@@ -63,7 +63,7 @@ module LuckySneaks # :nodoc:
     # It also accepts some options used to stub out <tt>save</tt> with a specified <tt>true</tt>
     # or <tt>false</tt> but you should be using <tt>stub_create</tt> in that case.
     def stub_initialize(klass, options = {})
-      returning mock_model(klass) do |member|
+      mock_model(klass).tap do |member|
         stub_out member, options.delete(:stub)
         if format = options[:format]
           stub_formatted member, format
@@ -123,7 +123,7 @@ module LuckySneaks # :nodoc:
     # and <tt>stub_destroy</tt>. If you need to stub <tt>update_attributes</tt> or 
     # <tt>destroy</tt> you should be using the aforementioned methods instead.
     def stub_find_one(klass, options = {})
-      returning mock_model(klass) do |member|
+      mock_model(klass).tap do |member|
         stub_out member, options.delete(:stub)
         if format = options.delete(:format)
           stub_formatted member, format
@@ -144,10 +144,8 @@ module LuckySneaks # :nodoc:
           else
             # Stubbing string and non-string just to be safe
             klass.stub!(:find).with(member.id).and_return(member)
-            klass.stub!(:find).with(member.id.to_s).and_return(member)
             unless options.empty?
               klass.stub!(:find).with(member.id, hash_including(options)).and_return(member)
-              klass.stub!(:find).with(member.id.to_s, hash_including(options)).and_return(member)
             end
           end
         end
@@ -172,7 +170,7 @@ module LuckySneaks # :nodoc:
     #     @comments = @document.comments.find(:all)
     #   end
     def stub_parent(klass, options = {})
-      returning stub_find_one(klass, options) do |member|
+      stub_find_one(klass, options).tap do |member|
         params[klass.name.foreign_key] = member.id
         if offspring = options.delete(:child)
           puts "stub_parent with :child option has been marked for deprecation"
@@ -225,7 +223,7 @@ module LuckySneaks # :nodoc:
     def stub_association(object, association, options = {})
       # I know options isn't implemented anywhere
       object_name = instance_variables.select{|name| instance_variable_get(name) == object}
-      returning mock("Association proxy for #{object_name}.#{association}") do |proxy|
+      mock("Association proxy for #{object_name}.#{association}").tap do |proxy|
         stub_out proxy, options[:stub] if options[:stub]
         object.stub!(association).and_return(proxy)
       end

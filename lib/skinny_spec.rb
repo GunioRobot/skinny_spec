@@ -1,7 +1,7 @@
 # Let's make sure everyone else is loaded
-require File.expand_path(RAILS_ROOT + "/config/environment")
-require 'spec'
-require 'spec/rails'
+require Rails.root.join('config', 'environment')
+require 'rspec/rails'
+
 begin
   require 'ruby2ruby'
 rescue LoadError
@@ -20,7 +20,9 @@ require "lucky_sneaks/model_spec_helpers"
 require "lucky_sneaks/view_spec_helpers"
 
 # Let's all come together
-Spec::Rails::Example::ViewExampleGroup.send :include, LuckySneaks::ViewSpecHelpers
-Spec::Rails::Example::HelperExampleGroup.send :include, LuckySneaks::CommonSpecHelpers
-Spec::Rails::Example::ControllerExampleGroup.send :include, LuckySneaks::ControllerSpecHelpers
-Spec::Rails::Example::ModelExampleGroup.send :include, LuckySneaks::ModelSpecHelpers
+RSpec.configure do |config|
+  config.include LuckySneaks::ControllerSpecHelpers, :type => :controller
+  config.include LuckySneaks::ModelSpecHelpers, :type => :model
+  config.include LuckySneaks::ViewSpecHelpers, :type => :view
+  config.include LuckySneaks::CommonSpecHelpers, :type => :helper
+end

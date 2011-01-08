@@ -5,6 +5,11 @@ module LuckySneaks
     end
     
   private
+    
+    def params
+      request.params
+    end
+    
     def define_implicit_request(method)
       parentize_params if parent?
       
@@ -17,7 +22,7 @@ module LuckySneaks
       when :update
         proc { put :update, params }
       when :destroy
-        proc { put :destroy, params }
+        proc { delete :destroy, params }
       end
     end
     

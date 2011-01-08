@@ -8,7 +8,7 @@ module LuckySneaks
     #   @foo.some_method_that_resets_updated_at
     #   @foo.updated_at.should == time_now
     def stub_time_now
-      returning Time.now do |now|
+      Time.now.tap do |now|
         Time.stub!(:now).and_return(now)
       end
     end
