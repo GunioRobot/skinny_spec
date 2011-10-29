@@ -3,16 +3,16 @@ module LuckySneaks
     def self.included(base)
       base.extend ExampleGroupMethods
     end
-    
+
   private
-    
+
     def params
       request.params
     end
-    
+
     def define_implicit_request(method)
       parentize_params if parent?
-      
+
       @controller_method = method
       @implicit_request = case method
       when :index, :new, :show, :edit
@@ -25,7 +25,7 @@ module LuckySneaks
         proc { delete :destroy, params }
       end
     end
-    
+
     def eval_request
       instance_eval &self.class.instance_variable_get("@the_request")
     rescue ArgumentError # missing block
@@ -48,18 +48,18 @@ module LuckySneaks
     def try_implicit_request
       @implicit_request.call
     end
-    
+
     def get_response(&block)
       eval_request
       block.call(response) if block_given?
       response
     end
-    
+
     module ExampleGroupMethods
       # Defines a request at the example group ("describe") level to be evaluated in the examples. Example:
-      # 
+      #
       #   define_request { get :index, params }
-      # 
+      #
       # <b>Note:</b> The following methods all define implicit requests: <tt>stub_index</tt>, <tt>stub_new</tt>,
       # <tt>stub_create</tt>, <tt>stub_show</tt>, <tt>stub_edit</tt>, <tt>stub_update</tt>, and
       # <tt>stub_destroy</tt>. Using them in your <tt>before</tt> blocks will allow you to forego

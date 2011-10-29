@@ -4,34 +4,34 @@ module LuckySneaks
     def self.included(base)
       base.extend ExampleGroupMethods
     end
-    
+
     def parent_name
       @parent_name ||= self.class.read_inheritable_attribute :parent
     end
-    
+
     def parent?
       !!parent_name
     end
-    
+
     def parent_model
       class_for(parent_name)
     end
-    
+
     def instance_variable_name
       @controller.controller_name
     end
-    
+
     def mock_parent
       @mock_parent ||= mock(parent_name, :id => 1)
     end
-    
+
     # Adds the appropriate parent id to the params hash. Should be called before
     # eval_request.
     def parentize_params
       params["#{parent_name.to_s.underscore}_id"] = mock_parent.id
       params
     end
-    
+
     # Creates stubs on the mock parent for finding the collection of children
     # and an individual child. The mock collection and child should be passed
     # as <tt>:collection</tt> and <tt>:member</tt> options (<tt>:member</tt> is
@@ -52,20 +52,20 @@ module LuckySneaks
     def create_nested_resource_stubs(options = {})
       @child_collection = collection = options.delete(:collection)
       member = options.delete(:member)
-      
+
       unless member.nil?
         collection.stub!(:find).with(member.id).and_return(member)
         collection.stub!(:find).with(member.id.to_s).and_return(member)
         member.stub!(parent_name).and_return(mock_parent)
       end
-      
+
       collection.stub!(:find).with(:all).and_return(collection)
       collection.stub!(:build).with(any_args).and_return(member)
 
       mock_parent.stub!(instance_variable_name).and_return(collection)
       parent_model.stub!(:find).with(mock_parent.id.to_s).and_return(mock_parent)
     end
-    
+
     # Creates an expectation on the instance variable for <tt>name</tt> that
     # it should receive <tt>find(:all)</tt> <b>only if <tt>name</tt> is
     # plural</b>. Meant to be used by <tt>it_should_find</tt>.
@@ -78,7 +78,7 @@ module LuckySneaks
         collection.should_receive(:find).with(:all).and_return(collection)
       end
     end
-    
+
     # Creates an expectation on the child collection (e.g., <tt>parent.children</tt>)
     # that it should receive <tt>build</tt> and return the instance variable for
     # <tt>name</tt>.
@@ -88,11 +88,11 @@ module LuckySneaks
     def create_nested_resource_instance_expectation(name)
       @child_collection.should_receive(:build).with(any_args).and_return(instance_for(name))
     end
-    
+
     # This module exposes the <tt>belongs_to</tt> method for tidying up controller
     # specs for nested resources. See the docs on that method.
     module ExampleGroupMethods
-      
+
       # Makes stubbing nested resources easier.
       #
       # Say Cat <tt>has_many :toys</tt> and Toy <tt>belongs_to :cat</tt>. In
@@ -114,7 +114,7 @@ module LuckySneaks
       #       before(:each) do
       #         @toys = stub_index(Toy)
       #       end
-      # 
+      #
       #       it_should_find_and_assign :toys
       #       it_should_render_template :index
       #     end

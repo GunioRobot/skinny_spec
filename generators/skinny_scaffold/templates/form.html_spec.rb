@@ -4,7 +4,7 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/form
   before(:each) do
     @<%= singular_name %> = mock_and_assign(<%= model_name %>, :stub => {
 <% if attributes.blank? -%>
-      # Add your stub attributes and return values here like: 
+      # Add your stub attributes and return values here like:
       # :name => "Foo", :address => "815 Oceanic Drive"
 <% else -%>
   <%- attributes.each_with_index do |attribute, index| -%>
@@ -23,18 +23,18 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/form
 <% end -%>
     })
   end
-  
+
   it_should_have_form_for :<%= singular_name %>
 <% if attributes.blank? -%>
   # Add specs for editing attributes here, please! Like this:
-  # 
+  #
   # it_should_allow_editing :<%= singular_name %>, :foo
 <% else -%>
   <%- attributes.each do |attribute| -%>
   it_should_allow_editing :<%= singular_name %>, :<%= attribute.name %>
   <%- end -%>
 <% end -%>
-  
+
   it_should_link_to_show :<%= singular_name %>
   it_should_link_to { <%= plural_name %>_path }
 end

@@ -3,7 +3,7 @@ require "skinny_spec"
 
 module LuckySneaks
   # These methods are designed to be used in your example [read: "it"] blocks
-  # to make your view specs less brittle and more DRY. You might also be interested 
+  # to make your view specs less brittle and more DRY. You might also be interested
   # in checking out the example block [read: "describe"] level versions in of these
   # methods which can DRY things up even more:
   # LuckySneaks::ViewSpecHelpers::ExampleGroupLevelMethods.
@@ -11,25 +11,25 @@ module LuckySneaks
     include LuckySneaks::CommonSpecHelpers
     include LuckySneaks::ViewStubHelpers
     include ActionDispatch::Routing::PolymorphicRoutes
-    
+
     def self.included(base) # :nodoc:
       base.extend ExampleGroupLevelMethods
     end
-    
+
     # Wraps a matcher that checks if the receiver contains a <tt>FORM</tt> element with
     # its <tt>action</tt> attribute set to the specified path.
     def submit_to(path)
       have_tag("form[action=#{path}]")
     end
-    
+
     # Wraps a matcher that checks if the receiver contains any of several form elements
     # that would return sufficient named parameters to allow editing of the specified
     # attribute on the specified instance. Example:
-    # 
+    #
     #   response.should allow_editing(@foo, "bar")
-    # 
+    #
     # can be satisfied by any of the following HTML elements:
-    # 
+    #
     #   <input name="foo[bar]" type="text" />
     #   <input name="foo[bar]" type="checkbox" />
     #   <input name="foo[bar_ids][]" type="checkbox" />
@@ -55,7 +55,7 @@ module LuckySneaks
         )
       end
     end
-    
+
     # Wraps a matcher that checks if the receiver contains a <tt>FORM</tt> element
     # whose <tt>enctype</tt> attribute is set to <tt>"multipart/form-data"<tt>
     # and contains an <tt>INPUT</tt> element whose <tt>name</tt> attribute correlates
@@ -65,7 +65,7 @@ module LuckySneaks
       have_tag("form[enctype='multipart/form-data'] input[type='file'][name='#{instance_name}[#{attribute}]']")
     end
 
-    # Wraps a matcher that checks if the receiver contains an <tt>A</tt> element (link) 
+    # Wraps a matcher that checks if the receiver contains an <tt>A</tt> element (link)
     # whose <tt>href</tt> attribute is set to the specified path or a <tt>FORM</tt>
     # element whose <tt>action</tt> attribute is set to the specified path.
     def have_link_or_button_to(path)
@@ -77,10 +77,10 @@ module LuckySneaks
     end
     alias have_link_to have_link_or_button_to
     alias have_button_to have_link_or_button_to
-    
+
     # Wraps <tt>have_link_or_button_to new_polymorphic_path<tt> for the specified class which
     # corresponds with the <tt>new</tt> method of the controller.
-    # 
+    #
     # <b>Note:</b> This method may takes a string or symbol representing the model's name
     # to send to <tt>have_link_or_button_to_show</tt> or the model's name itself.
     def have_link_or_button_to_new(name)
@@ -122,20 +122,20 @@ module LuckySneaks
         a[href=\"#{path}\"][onclick*=\"f.method = 'POST'\"][onclick*=\"m.setAttribute('name', '_method'); m.setAttribute('value', 'delete')\"]"
       )
     end
-    
+
     # Creates a <tt>mock_model</tt> instance and adds it to the <tt>assigns</tt> collection
     # using either the name passed as the first argument or the underscore version
     # of its class name. Accepts optional arguments to stub out additional methods
     # (and their return values) on the <tt>mock_model</tt> instance. Example:
-    # 
+    #
     #   mock_and_assign(Foo, :stub => {:bar => "bar"})
-    # 
+    #
     # is the same as running <tt>assigns[:foo] = mock_model(Foo, :bar => "bar")</tt>.
-    # 
+    #
     #   mock_and_assign(Foo, "special_foo", :stub => {:bar => "baz"})
-    # 
+    #
     # is the same as running <tt>assigns[:special_foo] = mock_model(Foo, :bar => "baz").
-    # 
+    #
     # <b>Note:</b> Adding to the assigns collection returns the object added, so this can
     # be chained a la <tt>@foo = mock_and_assign(Foo)</tt>.
     def mock_and_assign(klass, *args)
@@ -148,7 +148,7 @@ module LuckySneaks
       yield mocked if block_given?
       self.assigns[args.first || "#{klass}".underscore] = mocked
     end
-    
+
     # Creates an array of <tt>mock_model</tt> instances in the manner of
     # <tt>mock_and_assign</tt>. Accepts <tt>option[:size]</tt> which sets the size
     # of the array (default is 3).
@@ -165,7 +165,7 @@ module LuckySneaks
       end
       self.assigns[args.first || "#{klass}".tableize] = return_me
     end
-    
+
   private
     def do_render
       if @the_template
@@ -179,17 +179,17 @@ module LuckySneaks
         raise NameError, error_message
       end
     end
-    
+
     # These methods are designed to be used at the example group [read: "describe"] level
     # to simplify and DRY up common expectations. Most of these methods are wrappers for
     # matchers which can also be used on the example level [read: within an "it" block]. See
     # LuckySneaks::ViewSpecHelpers for more information.
     module ExampleGroupLevelMethods
       include LuckySneaks::CommonSpecHelpers
-      
+
       # Creates an expectation which calls <tt>submit_to</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a Proc to evaluate the route not simply a named route
       # helper, which would be undefined in the scope of the example block.
       def it_should_submit_to(hint = nil, &route)
@@ -201,7 +201,7 @@ module LuckySneaks
           response.should submit_to(instance_eval(&route))
         end
       end
-      
+
       # Negative version of <tt>it_should_submit_to</tt>. See that method for more
       # details.
       def it_should_not_submit_to(hint = nil, &route)
@@ -213,10 +213,10 @@ module LuckySneaks
           response.should_not submit_to(instance_eval(&route))
         end
       end
-      
+
       # Creates an expectation that the template uses Rails' <tt>form_for</tt> to generate
       # the proper form action and method to create or update the specified object.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to create the expectation for <tt>form_for</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -232,7 +232,7 @@ module LuckySneaks
           do_render
         end
       end
-      
+
       # Negative version of <tt>it_should_have_form_for</tt>. See that method for more
       # details.
       def it_should_not_have_form_for(name, options = {})
@@ -249,7 +249,7 @@ module LuckySneaks
       # Creates an expectation which calls <tt>allow_editing</tt> on the rendered
       # template for each attribute specified. See the docs for <tt>allow_editing</tt>
       # for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to send to <tt>allow_editing</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -262,7 +262,7 @@ module LuckySneaks
           end
         end
       end
-      
+
       # Negative version of <tt>it_should_allow_editing</tt>. See that method for more
       # details.
       def it_should_not_allow_editing(instance_name, *attributes)
@@ -274,11 +274,11 @@ module LuckySneaks
           end
         end
       end
-      
+
       # Creates an expectation which calls <tt>allow_uploading</tt> on the rendered
       # template for each attribute specified. See the docs for <tt>allow_uploading</tt>
       # for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to send to <tt>allow_uploading</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -291,7 +291,7 @@ module LuckySneaks
           end
         end
       end
-      
+
       # Negative version of <tt>it_should_allow_uploading</tt>. See that method for more
       # details.
       def it_should_not_allow_uploading(instance_name, *attributes)
@@ -303,7 +303,7 @@ module LuckySneaks
           end
         end
       end
-      
+
       # Creates an expectation that the rendered template contains a <tt>FORM</tt> element
       # (<tt>INPUT</tt>, <tt>TEXTAREA</tt>, or <tt>SELECT</tt>) with the specified name.
       def it_should_have_form_element_for(name)
@@ -316,7 +316,7 @@ module LuckySneaks
           )
         end
       end
-      
+
       # Negative version of <tt>it_should_have_form_element_for</tt>. See that method
       # for more details.
       def it_should_not_have_form_element_for(name)
@@ -332,7 +332,7 @@ module LuckySneaks
 
       # Creates an expectation which calls <tt>have_link_or_button_to</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a block to evaluate the route in the example context
       # instead of the example group context.
       def it_should_link_to(hint = nil, &route)
@@ -347,7 +347,7 @@ module LuckySneaks
       alias it_should_have_link_to it_should_link_to
       alias it_should_have_button_to it_should_link_to
       alias it_should_have_button_or_link_to it_should_link_to
-      
+
       # Negative version of <tt>it_should_link_to</tt>. See that method
       # for more details.
       def it_should_not_link_to(hint = nil, &route)
@@ -362,10 +362,10 @@ module LuckySneaks
       alias it_should_not_have_link_to it_should_not_link_to
       alias it_should_not_have_button_to it_should_not_link_to
       alias it_should_not_have_button_or_link_to it_should_not_link_to
-      
+
       # Creates an expectation which calls <tt>have_link_or_button_to_new</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method may takes a string or symbol representing the model's name
       # to send to <tt>have_link_or_button_to_show</tt> or the model's name itself.
       def it_should_link_to_new(name)
@@ -377,7 +377,7 @@ module LuckySneaks
       alias it_should_have_link_to_new it_should_link_to_new
       alias it_should_have_button_to_new it_should_link_to_new
       alias it_should_have_button_or_link_to_new it_should_link_to_new
-      
+
       # Negative version of <tt>it_should_link_to_show</tt>. See that method
       # for more details.
       def it_should_not_link_to_new(name)
@@ -389,10 +389,10 @@ module LuckySneaks
       alias it_should_not_have_link_to_new it_should_not_link_to_new
       alias it_should_not_have_button_to_new it_should_not_link_to_new
       alias it_should_not_have_button_or_link_to_new it_should_not_link_to_new
-      
+
       # Creates an expectation which calls <tt>have_link_or_button_to_show</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to send to <tt>have_link_or_button_to_show</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -405,7 +405,7 @@ module LuckySneaks
       alias it_should_have_link_to_show it_should_link_to_show
       alias it_should_have_button_to_show it_should_link_to_show
       alias it_should_have_button_or_link_to_show it_should_link_to_show
-      
+
       # Negative version of <tt>it_should_link_to_show</tt>. See that method
       # for more details.
       def it_should_not_link_to_show(name)
@@ -417,11 +417,11 @@ module LuckySneaks
       alias it_should_not_have_link_to_show it_should_not_link_to_show
       alias it_should_not_have_button_to_show it_should_not_link_to_show
       alias it_should_not_have_button_or_link_to_show it_should_not_link_to_show
-      
+
       # Creates an expectation which calls <tt>have_link_or_button_to_show</tt>
       # for each member of the instance variable matching the specified name
       # on the response from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name and not an instance variable, which would be nil
       # in the scope of the example block.
@@ -439,7 +439,7 @@ module LuckySneaks
 
       # Creates an expectation which calls <tt>have_link_or_button_to_edit</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to send to <tt>have_link_or_button_to_edit</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -452,7 +452,7 @@ module LuckySneaks
       alias it_should_have_link_to_edit it_should_link_to_edit
       alias it_should_have_button_to_edit it_should_link_to_edit
       alias it_should_have_button_or_link_to_edit it_should_link_to_edit
-      
+
       # Negative version of <tt>it_should_link_to_edit</tt>. See that method
       # for more details.
       def it_should_not_link_to_edit(name)
@@ -469,7 +469,7 @@ module LuckySneaks
       # Creates an expectation which calls <tt>have_link_or_button_to_edit</tt>
       # for each member of the instance variable matching the specified name
       # on the response from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name and not an instance variable, which would be nil
       # in the scope of the example block.
@@ -487,7 +487,7 @@ module LuckySneaks
 
       # Creates an expectation which calls <tt>have_link_or_button_to_delete</tt> on the response
       # from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name to send to <tt>have_link_or_button_to_delete</tt>
       # not an instance variable, which would be nil in the scope of the example block.
@@ -500,7 +500,7 @@ module LuckySneaks
       alias it_should_have_link_to_delete it_should_link_to_delete
       alias it_should_have_button_to_delete it_should_link_to_delete
       alias it_should_have_button_or_link_to_delete it_should_link_to_delete
-      
+
       # Negative version of <tt>it_should_link_to_delete</tt>. See that method
       # for more details.
       def it_should_not_link_to_delete(name)
@@ -516,7 +516,7 @@ module LuckySneaks
       # Creates an expectation which calls <tt>have_link_or_button_to_delete</tt>
       # for each member of the instance variable matching the specified name
       # on the response from rendering the template. See that method for more details.
-      # 
+      #
       # <b>Note:</b> This method takes a string or symbol representing the instance
       # variable's name and not an instance variable, which would be nil
       # in the scope of the example block.
@@ -531,7 +531,7 @@ module LuckySneaks
       alias it_should_have_link_to_delete_each it_should_link_to_delete_each
       alias it_should_have_button_to_delete_each it_should_link_to_delete_each
       alias it_should_have_button_or_link_to_delete_each it_should_link_to_delete_each
-      
+
       # Creates an expectation that the template should call <tt>render :partial</tt>
       # with the specified template.
       def it_should_render_partial(name)
@@ -540,7 +540,7 @@ module LuckySneaks
           do_render
         end
       end
-      
+
       # Negative version of <tt>it_should_render_partial</tt>. See that method
       # for more details.
       def it_should_not_render_partial(name)
@@ -549,15 +549,15 @@ module LuckySneaks
           do_render
         end
       end
-      
-      # Sets <tt>@the_template</tt> (for use in <tt>do_render</tt>) using the current 
+
+      # Sets <tt>@the_template</tt> (for use in <tt>do_render</tt>) using the current
       # example group description. Example:
-      # 
+      #
       # describe "users/index.haml.erb" do
       #   use_describe_for_template!
       #   # ...
       # end
-      # 
+      #
       # This is equivalent to setting <tt>@the_template = "users/index.haml.erb"</tt>
       # in a before block.
       def use_describe_for_template!

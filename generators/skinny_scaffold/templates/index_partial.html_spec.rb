@@ -4,7 +4,7 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/_<%=
   before(:each) do
     @<%= singular_name %> = mock_and_assign(<%= model_name %>, :stub => {
 <% if attributes.blank? -%>
-      # Add your stub attributes and return values here like: 
+      # Add your stub attributes and return values here like:
       # :name => "Foo", :created_at => 1.week.ago, :updated_at => nil
 <% else -%>
   <%- attributes.each_with_index do |attribute, index| -%>
@@ -24,7 +24,7 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/_<%=
     })
     template.stub!(:<%= singular_name %>).and_return(@<%= singular_name %>)
   end
-  
+
   it_should_link_to_show :<%= singular_name %>
   it_should_link_to_edit :<%= singular_name %>
   it_should_link_to_delete :<%= singular_name %>

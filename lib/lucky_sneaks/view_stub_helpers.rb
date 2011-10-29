@@ -6,7 +6,7 @@ module LuckySneaks
   # a whole lot of functionality with just a tiny bit of effort.
   module ViewStubHelpers
     # Shorthand for the following stub:
-    # 
+    #
     #   template.stub!(:render).with(hash_including(:partial => anything))
     def stub_partial_rendering!
       template.stub!(:render).with(hash_including(:partial => anything))

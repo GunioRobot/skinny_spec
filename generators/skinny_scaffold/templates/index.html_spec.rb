@@ -5,11 +5,11 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/inde
     @<%= plural_name %> = mock_and_assign_collection(<%= model_name %>)
     template.stub! :render
   end
-  
+
   it "should render :partial => @<%= plural_name %>" do
     template.should_receive(:render).with(:partial => @<%= plural_name %>)
     do_render
   end
-  
+
   it_should_link_to_new :<%= singular_name %>
 end

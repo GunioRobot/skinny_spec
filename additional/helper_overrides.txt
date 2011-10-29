@@ -45,8 +45,8 @@ def button_to_function(name, *args, &block)
 
   html_options.symbolize_keys!
   function = update_page(&block) if block_given?
-  content_tag(:button, name, html_options.merge({ 
-    :onclick => (html_options[:onclick] ? "#{html_options[:onclick]}; " : "") + "#{function};" 
+  content_tag(:button, name, html_options.merge({
+    :onclick => (html_options[:onclick] ? "#{html_options[:onclick]}; " : "") + "#{function};"
   }))
 end
 

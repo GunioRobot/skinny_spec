@@ -22,10 +22,10 @@ describe "<%= File.join(controller_class_path, controller_singular_name) %>/show
     })
 <% end -%>
   end
-  
+
   # Add your specs here, please! But remember not to make them brittle
   # by specing specing specific HTML elements and classes.
-  
+
   it_should_link_to_edit :<%= singular_name %>
   it_should_link_to { <%= plural_name %>_path }
 end

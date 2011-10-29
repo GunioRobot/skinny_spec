@@ -47,7 +47,7 @@ Let's look at the controller specs.
       it_should_find_and_assign :users
       it_should_render :template, "index"
     end
-    
+
     # ...
 
     describe "POST :create" do
@@ -59,7 +59,7 @@ Let's look at the controller specs.
         it_should_initialize_and_save :user
         it_should_redirect_to { user_url(@user) }
       end
-    
+
     # ...
 
 First thing you should see is an example group for <tt>GET :index</tt>. That <tt>stub_index</tt> method there
@@ -68,14 +68,14 @@ does a lot of work behind the curtain. I'll leave it up to you to check the docu
 methods named <tt>stub_<i>controller_method</i></tt> should only be used for stubbing and
 mocking the main object of the method. To create mocks for other ancillary objects, please
 use <tt>stub_find_all</tt>, <tt>stub_find_one</tt>, and <tt>stub_initialize</tt>. The reason
-for this is because the former methods actually save us a step by defining an implicit 
+for this is because the former methods actually save us a step by defining an implicit
 controller method request. If you add a new method to your resource routing, you'll want to
 use the helper method <tt>define_request</tt> in those example groups to define an explicit
 request, like so:
 
   describe "PUT :demote" do
     define_request { put :demote }
-    
+
     # ...
   end
 
@@ -86,16 +86,16 @@ You can also define a method called <tt>shared_request</tt> to "share" a
     def shared_request
       post :create
     end
-    
+
     describe "when successful" do
       # ...
     end
-    
+
     describe "when unsuccessful" do
       # ...
     end
   end
-  
+
 Note: When you're adding longer, more complicated controller specs you can still leverage
 implicit and explicit requests by calling <tt>do_request</tt> in your spec as in the following
 example:
@@ -110,14 +110,14 @@ example:
       @user = stub_new(User)
       @categories = stub_find_all(Category)
     end
-    
+
     # ...
-    
+
     it "should preload categories" do
       Category.should_receive(:find).with(:all)
       do_request
     end
-    
+
     it "should assign @categories" do
       do_request
       assigns[:categories].should == @categories
@@ -130,7 +130,7 @@ It's also simple to write examples for resourceful controllers that may be neste
   ActionController::Routing::Routes.draw do |map|
     map.resources :cats, :has_many => :toys
   end
-  
+
   # spec/controllers/toys_controller_spec.rb
   describe ToysController do
     belongs_to :cat
@@ -170,7 +170,7 @@ expectations like:
   it_should_assign :users
 
 See the documentation for the <tt>it_should_find</tt> for more information. You might have guessed that
-<tt>it_should_initialize_assign</tt> and <tt>it_should_render_template</tt> work in a similar 
+<tt>it_should_initialize_assign</tt> and <tt>it_should_render_template</tt> work in a similar
 fashion and you'd be right. Again, see the documentation for these individual methods for more
 information. Lots of information in those docs.
 
@@ -205,7 +205,7 @@ Now let's move to the view specs!
         :adult => false
       })
     end
-    
+
     it_should_have_form_for :user
 
     it_should_allow_editing :user, :name
@@ -228,7 +228,7 @@ the much longer:
     template.should_receive(:form_for).with(@user)
     do_render
   end
-  
+
 Next up is the <tt>it_should_allow_editing</tt> helper. I love this method the most because it
 really helps DRY up that view spec while at the same time being amazingly unbrittle. Instead of
 creating an expectation for a specific form element, this method creates a generalized expectation
@@ -259,13 +259,13 @@ you call them like:
 
   it_should_belong_to :manager
   it_should_have_many :clients
-  
+
 Within an example you can call them on either the class or the instance setup in the
 "before" block. These are equivalent:
 
   @user.should belong_to(:group)
   User.should belong_to(:group)
-  
+
 I've also added some very basic validation helpers like <tt>it_should_validate_presence_of</tt>,
 <tt>it_should_validate_uniqueness_of</tt>, <tt>it_should_not_mass_assign</tt>. Please consult
 the documentation for more information.
@@ -280,7 +280,7 @@ In the scaffolding, I have used my own idiomatic Rails usage:
 * Some instances where you might expect link_to are button_to. This is to provide a common
   interface element which can be styled the same instead of a mishmash of links and buttons and
   inputs everywhere. To take full advantage of this, I usually override many of Rails' default
-  helpers with custom ones that all use actual HTML <tt>BUTTON</tt> elements which are much 
+  helpers with custom ones that all use actual HTML <tt>BUTTON</tt> elements which are much
   easier to style than "button" typed <tt>INPUT</tt>. I've provided a text file in the
   "additional" folder of this plugin which you can use in your ApplicationHelper. (I also
   provide an optional override helper for the <tt>label</tt> method which uses
